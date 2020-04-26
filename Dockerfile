@@ -1,4 +1,4 @@
-FROM mmuellerm/openkm-debian:v6.3.8b
+FROM mmuellerm/openkm-debian:v6.3.9
 
 ONBUILD ARG PG_USERNAME=openkm
 ONBUILD ARG PG_PASSWORD="*secret*"
