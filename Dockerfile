@@ -31,9 +31,9 @@ RUN apt-get install -y build-essential \
                        tesseract-ocr-deu && \
     apt-get clean
 
-RUN wget -O /usr/lib/jvm/jdk-8u271-linux-x64.tar.gz -c --header "Cookie: oraclelicense=accept-securebackup-cookie" https://javadl.oracle.com/webapps/download/GetFile/1.8.0_271-b09/61ae65e088624f5aaa0b1d2d801acb16/linux-i586/jdk-8u271-linux-x64.tar.gz && \
-    tar zxvf /usr/lib/jvm/jdk-8u271-linux-x64.tar.gz --directory /usr/lib/jvm && rm /usr/lib/jvm/jdk-8u271-linux-x64.tar.gz && \
-    unlink /etc/alternatives/java && ln -s /usr/lib/jvm/jdk1.8.0_271/bin/java /etc/alternatives/java
+RUN wget -O /usr/lib/jvm/jdk-8u281-linux-x64.tar.gz -c --header "Cookie: oraclelicense=accept-securebackup-cookie" https://javadl.oracle.com/webapps/download/GetFile/1.8.0_281-b09/89d678f2be164786b292527658ca1605/linux-i586/jdk-8u281-linux-x64.tar.gz && \
+    tar zxvf /usr/lib/jvm/jdk-8u281-linux-x64.tar.gz --directory /usr/lib/jvm && rm /usr/lib/jvm/jdk-8u281-linux-x64.tar.gz && \
+    unlink /etc/alternatives/java && ln -s /usr/lib/jvm/jdk1.8.0_281/bin/java /etc/alternatives/java
 
 RUN wget -O /usr/local/swftools-0.9.2.tar.gz http://www.swftools.org/swftools-0.9.2.tar.gz && tar --directory /usr/local --ungzip -xf /usr/local/swftools-0.9.2.tar.gz && rm /usr/local/swftools-0.9.2.tar.gz && \
     cd /usr/local/swftools-0.9.2/swfs && \
@@ -49,15 +49,15 @@ RUN wget -O /usr/local/swftools-0.9.2.tar.gz http://www.swftools.org/swftools-0.
     sed -i '/^    if (DGifSlurp(gft) != GIF_OK) { $/, /^        PrintGifError();$/c\    if (DGifSlurp(gft) != GIF_OK) { \n        fprintf(stderr, "error in GIF file: %s\\n", fname);' gif2swf.c && \
     cd .. && ./configure && make && make install && cd / && rm -r /usr/local/swftools-0.9.2
 
-ENV PATH="$PATH:/usr/lib/jvm/jdk1.8.0_271/bin"
+ENV PATH="$PATH:/usr/lib/jvm/jdk1.8.0_281/bin"
 ENV CATALINA_HOME=/usr/local/tomcat
 ENV JAVA_HOME=/usr/local/java
-ENV OPENJDK_HOME=/usr/lib/jvm/jdk1.8.0_271/
+ENV OPENJDK_HOME=/usr/lib/jvm/jdk1.8.0_281/
 ENV TOMCAT_HOME="$CATALINA_HOME"
 
 RUN ln -s $OPENJDK_HOME $JAVA_HOME && \
     wget -O /usr/local/openkm-tomcat-bundle.zip https://sourceforge.net/projects/openkm/files/6.3.2/openkm-6.3.2-community-tomcat-bundle.zip/download && unzip /usr/local/openkm-tomcat-bundle.zip -d /usr/local/ && rm /usr/local/openkm-tomcat-bundle.zip && ln -s $CATALINA_HOME /opt/openkm && \
-    wget -O /tmp/openkm-6.3.9.zip https://sourceforge.net/projects/openkm/files/6.3.9/OpenKM-6.3.9.zip/download && unzip /tmp/openkm-6.3.9.zip -d /tmp/ && mv /tmp/OpenKM.war $TOMCAT_HOME/webapps/ && rm /tmp/openkm-6.3.9.zip /tmp/md5sum.txt && \
+    wget -O /tmp/openkm-6.3.10.zip https://sourceforge.net/projects/openkm/files/6.3.10/OpenKM-6.3.10.zip/download && unzip /tmp/openkm-6.3.10.zip -d /tmp/ && mv /tmp/OpenKM.war $TOMCAT_HOME/webapps/ && rm /tmp/openkm-6.3.10.zip /tmp/md5sum.txt && \
     sed -i 's|http://www.springframework.org/schema/security/spring-security-3.1.xsd|http://www.springframework.org/schema/security/spring-security-3.2.xsd|' $TOMCAT_HOME/OpenKM.xml
 
 ONBUILD ARG PG_USERNAME=openkm
