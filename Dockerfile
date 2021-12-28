@@ -1,8 +1,8 @@
-FROM debian:buster
+FROM debian:bullseye
 
 LABEL maintainer="Matthias Mueller m-mueller-minden at t-online dot de"
 
-RUN apt-get update && apt-get install -y libapt-pkg-perl perl-modules-5.28 dialog wget && apt-get upgrade -y
+RUN apt-get update && apt-get install -y libapt-pkg-perl perl-modules-5.32 dialog wget && apt-get upgrade -y
 
 RUN sed -i '/#session[[:space:]]*required[[:space:]]*pam_limits.so/s/^#//;' /etc/pam.d/su && \
     sed -i '/# End of file/d' /etc/security/limits.conf && \
@@ -28,31 +28,27 @@ RUN apt-get install -y build-essential \
                        gzip \
                        tesseract-ocr \
                        tesseract-ocr-eng \
-                       tesseract-ocr-deu && \
+                       tesseract-ocr-deu \
+                       patch && \
     apt-get clean
 
-RUN wget -O /usr/lib/jvm/jdk-8u281-linux-x64.tar.gz -c --header "Cookie: oraclelicense=accept-securebackup-cookie" https://javadl.oracle.com/webapps/download/GetFile/1.8.0_281-b09/89d678f2be164786b292527658ca1605/linux-i586/jdk-8u281-linux-x64.tar.gz && \
-    tar zxvf /usr/lib/jvm/jdk-8u281-linux-x64.tar.gz --directory /usr/lib/jvm && rm /usr/lib/jvm/jdk-8u281-linux-x64.tar.gz && \
-    unlink /etc/alternatives/java && ln -s /usr/lib/jvm/jdk1.8.0_281/bin/java /etc/alternatives/java
+RUN wget -O /usr/lib/jvm/jdk-8u311-linux-x64.tar.gz -c --header "Cookie: oraclelicense=accept-securebackup-cookie" https://download.oracle.com/otn-pub/java/jdk/8u311-b11/4d5417147a92418ea8b615e228bb6935/jdk-8u311-linux-x64.tar.gz && \
+    tar zxvf /usr/lib/jvm/jdk-8u311-linux-x64.tar.gz --directory /usr/lib/jvm && rm /usr/lib/jvm/jdk-8u311-linux-x64.tar.gz && \
+    unlink /etc/alternatives/java && ln -s /usr/lib/jvm/jdk1.8.0_311/bin/java /etc/alternatives/java
 
 RUN wget -O /usr/local/swftools-0.9.2.tar.gz http://www.swftools.org/swftools-0.9.2.tar.gz && tar --directory /usr/local --ungzip -xf /usr/local/swftools-0.9.2.tar.gz && rm /usr/local/swftools-0.9.2.tar.gz && \
-    cd /usr/local/swftools-0.9.2/swfs && \
-    sed -i 's|rm -f $(pkgdatadir)/swfs/default_viewer.swf -o -L $(pkgdatadir)/swfs/default_viewer.swf|rm -f $(pkgdatadir)/swfs/default_viewer.swf|' Makefile.in && \
-    sed -i 's|rm -f $(pkgdatadir)/swfs/default_loader.swf -o -L $(pkgdatadir)/swfs/default_loader.swf|rm -f $(pkgdatadir)/swfs/default_loader.swf|' Makefile.in && \
-    cd ../src && \
-    sed -i '/^TAG \*MovieAddFrame(SWF \* swf, TAG \* t, char \*sname, int id, int imgidx)$/, /^{$/c\TAG *MovieAddFrame(SWF * swf, TAG * t, char *sname, int id, int imgidx)\n{\n    int *error;' gif2swf.c && \
-    sed -i '/^int CheckInputFile(char \*fname, char \*\*realname)$/, /^{$/c\int CheckInputFile(char *fname, char **realname)\n{\n    int *error;' gif2swf.c && \
-    sed -i 's/DGifOpenFileName(sname)/DGifOpenFileName(sname, error)/g' gif2swf.c && \
-    sed -i 's/DGifOpenFileName(s)/DGifOpenFileName(s, error)/g' gif2swf.c && \
-    sed -i 's/DGifCloseFile(gft)/DGifCloseFile(gft, error)/g' gif2swf.c && \
-    sed -i '/^    if (DGifSlurp(gft) != GIF_OK) {$/, /^        PrintGifError();$/c\    if (DGifSlurp(gft) != GIF_OK) {\n        fprintf(stderr, "error in GIF file: %s\\n", sname);' gif2swf.c && \
-    sed -i '/^    if (DGifSlurp(gft) != GIF_OK) { $/, /^        PrintGifError();$/c\    if (DGifSlurp(gft) != GIF_OK) { \n        fprintf(stderr, "error in GIF file: %s\\n", fname);' gif2swf.c && \
-    cd .. && ./configure && make && make install && cd / && rm -r /usr/local/swftools-0.9.2
+    wget -O /usr/local/swftools-0.9.2/swftools.tar.gz http://aur.archlinux.org/cgit/aur.git/snapshot/swftools.tar.gz && tar --directory /usr/local/swftools-0.9.2 --ungzip -xf /usr/local/swftools-0.9.2/swftools.tar.gz && \
+    rm /usr/local/swftools-0.9.2/swftools.tar.gz && cp /usr/local/swftools-0.9.2/swftools/giflib-5.1.patch /usr/local/swftools-0.9.2/giflib-5.1.patch && cp /usr/local/swftools-0.9.2/swftools/swftools-0.9.2.patch /usr/local/swftools-0.9.2/swftools-0.9.2.patch 
 
-ENV PATH="$PATH:/usr/lib/jvm/jdk1.8.0_281/bin"
+ADD extern.patch /usr/local/swftools-0.9.2/extern.patch
+
+RUN mv /usr/local/swftools-0.9.2/swfs/Makefile.in /usr/local/swftools-0.9.2/swfs/Makefile && cd /usr/local/swftools-0.9.2 && patch -Np0 -i giflib-5.1.patch && patch -Np0 -i swftools-0.9.2.patch && patch -Np0 -i extern.patch && \
+    mv swfs/Makefile swfs/Makefile.in && ./configure && make && make install && cd / && rm -r /usr/local/swftools-0.9.2
+
+ENV PATH="$PATH:/usr/lib/jvm/jdk1.8.0_311/bin"
 ENV CATALINA_HOME=/usr/local/tomcat
 ENV JAVA_HOME=/usr/local/java
-ENV OPENJDK_HOME=/usr/lib/jvm/jdk1.8.0_281/
+ENV OPENJDK_HOME=/usr/lib/jvm/jdk1.8.0_311/
 ENV TOMCAT_HOME="$CATALINA_HOME"
 
 RUN ln -s $OPENJDK_HOME $JAVA_HOME && \
