@@ -53,7 +53,7 @@ ENV TOMCAT_HOME="$CATALINA_HOME"
 
 RUN ln -s $OPENJDK_HOME $JAVA_HOME && \
     wget -O /usr/local/openkm-tomcat-bundle.zip https://sourceforge.net/projects/openkm/files/6.3.2/openkm-6.3.2-community-tomcat-bundle.zip/download && unzip /usr/local/openkm-tomcat-bundle.zip -d /usr/local/ && rm /usr/local/openkm-tomcat-bundle.zip && ln -s $CATALINA_HOME /opt/openkm && \
-    wget -O /tmp/openkm-6.3.11.zip https://sourceforge.net/projects/openkm/files/6.3.11/OpenKM-6.3.11.zip/download && unzip /tmp/openkm-6.3.11.zip -d /tmp/ && mv /tmp/OpenKM.war $TOMCAT_HOME/webapps/ && rm /tmp/openkm-6.3.10.zip /tmp/md5sum.txt && \
+    wget -O /tmp/openkm-6.3.11.zip https://sourceforge.net/projects/openkm/files/6.3.11/OpenKM-6.3.11.zip/download && unzip /tmp/openkm-6.3.11.zip -d /tmp/ && mv /tmp/OpenKM.war $TOMCAT_HOME/webapps/ && rm /tmp/openkm-6.3.11.zip /tmp/md5sum.txt && \
     sed -i 's|http://www.springframework.org/schema/security/spring-security-3.1.xsd|http://www.springframework.org/schema/security/spring-security-3.2.xsd|' $TOMCAT_HOME/OpenKM.xml
 
 ONBUILD ARG PG_USERNAME=openkm
