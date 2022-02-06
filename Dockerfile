@@ -32,9 +32,11 @@ RUN apt-get install -y build-essential \
                        patch && \
     apt-get clean
 
-RUN wget -O /usr/lib/jvm/jdk-8u311-linux-x64.tar.gz -c --header "Cookie: oraclelicense=accept-securebackup-cookie" https://download.oracle.com/otn-pub/java/jdk/8u311-b11/4d5417147a92418ea8b615e228bb6935/jdk-8u311-linux-x64.tar.gz && \
-    tar zxvf /usr/lib/jvm/jdk-8u311-linux-x64.tar.gz --directory /usr/lib/jvm && rm /usr/lib/jvm/jdk-8u311-linux-x64.tar.gz && \
-    unlink /etc/alternatives/java && ln -s /usr/lib/jvm/jdk1.8.0_311/bin/java /etc/alternatives/java
+RUN sed -i 's|<policy domain="coder" rights="none" pattern="PDF" />|<policy domain="coder" rights="read\|write" pattern="PDF" />|' /etc/ImageMagick-6/policy.xml
+
+RUN wget -O /usr/lib/jvm/jdk-8u321-linux-x64.tar.gz -c --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u321-b07/df5ad55fdd604472a86a45a217032c7d/jdk-8u321-linux-x64.tar.gz && \
+    tar zxvf /usr/lib/jvm/jdk-8u321-linux-x64.tar.gz --directory /usr/lib/jvm && rm /usr/lib/jvm/jdk-8u321-linux-x64.tar.gz && \
+    unlink /etc/alternatives/java && ln -s /usr/lib/jvm/jdk1.8.0_321/bin/java /etc/alternatives/java
 
 RUN wget -O /usr/local/swftools-0.9.2.tar.gz http://www.swftools.org/swftools-0.9.2.tar.gz && tar --directory /usr/local --ungzip -xf /usr/local/swftools-0.9.2.tar.gz && rm /usr/local/swftools-0.9.2.tar.gz && \
     wget -O /usr/local/swftools-0.9.2/swftools.tar.gz http://aur.archlinux.org/cgit/aur.git/snapshot/swftools.tar.gz && tar --directory /usr/local/swftools-0.9.2 --ungzip -xf /usr/local/swftools-0.9.2/swftools.tar.gz && \
@@ -45,10 +47,10 @@ ADD extern.patch /usr/local/swftools-0.9.2/extern.patch
 RUN mv /usr/local/swftools-0.9.2/swfs/Makefile.in /usr/local/swftools-0.9.2/swfs/Makefile && cd /usr/local/swftools-0.9.2 && patch -Np0 -i giflib-5.1.patch && patch -Np0 -i swftools-0.9.2.patch && patch -Np0 -i extern.patch && \
     mv swfs/Makefile swfs/Makefile.in && ./configure && make && make install && cd / && rm -r /usr/local/swftools-0.9.2
 
-ENV PATH="$PATH:/usr/lib/jvm/jdk1.8.0_311/bin"
+ENV PATH="$PATH:/usr/lib/jvm/jdk1.8.0_321/bin"
 ENV CATALINA_HOME=/usr/local/tomcat
 ENV JAVA_HOME=/usr/local/java
-ENV OPENJDK_HOME=/usr/lib/jvm/jdk1.8.0_311/
+ENV OPENJDK_HOME=/usr/lib/jvm/jdk1.8.0_321/
 ENV TOMCAT_HOME="$CATALINA_HOME"
 
 RUN ln -s $OPENJDK_HOME $JAVA_HOME && \
