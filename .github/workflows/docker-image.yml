@@ -5,7 +5,7 @@ on:
     branches: [ master ]
 
 env:
-   VERSION_TAG: v6.3.11b
+   VERSION_TAG: v6.3.12
    
 jobs:
 
